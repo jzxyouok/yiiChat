@@ -131,6 +131,7 @@ class Chat extends CWidget
                 'textFieldID' => $this->textFieldID,
                 'bOpen' => $this->bOpen,
                 'updateInterval' => $this->updateInterval,
+                'assetsUrl' => $baseUrl,
             );
             $options = CJavaScript::encode($options);
             Yii::app() -> clientScript -> registerScript(__CLASS__.'#'.$this->id, "jQuery('#$this->id').chat($options);");

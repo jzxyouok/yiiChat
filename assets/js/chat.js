@@ -90,6 +90,7 @@
 					bOpen:			false,
                     updateInterval: 5000
 					// lastMessageID last message id in the message window, this is corresponding to the id the database
+                    // assetsUrl
 				}, options || {}),
                 
                 $chat = $(this);
@@ -194,15 +195,22 @@
          * Open or close the chat window
          */
         open: function () {
-			if (chatSettings.bOpen)
+            var settings = chatSettings;
+            
+			if (chatSettings.bOpen) {
 				this.animate({'right': '0px'});
+                $("#" + settings.openCloseTagID).css('background-image', 'url(' + settings.assetsUrl + '/img/buttonClose.png)');
+			}
 			else {
+			
 				if (this.css('right') == 'auto')
 					this.css('right', '-' + this.outerWidth() + 'px');
 				else
 					this.animate({'right': '-' + this.outerWidth() + 'px'});
+                
+                $("#" + settings.openCloseTagID).css('background-image', 'url(' + settings.assetsUrl + '/img/buttonOpen.png)');
 			}
-			
+            
 			chatSettings.bOpen = !chatSettings.bOpen;
         }
 	};
