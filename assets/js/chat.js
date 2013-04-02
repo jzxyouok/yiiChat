@@ -140,7 +140,7 @@
 				data: {
 					'username': settings.username,
 					'message': message,
-					'date': Math.round(date.getTime() / 1000) /* Unix time in seconds */
+					'date': Math.floor(date.getTime() / 1000) /* Unix time in seconds */
 				}
 			}).done(function(lastMesID) {
 				settings.lastMessageID = lastMesID;
