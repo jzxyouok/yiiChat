@@ -109,7 +109,10 @@
 
             addMsgFunc = function() {
                 if ($("#" + settings.textFieldID).val()) {
-                    $chat.chat('addMessage');
+					message = $("#" + settings.textFieldID).val();
+                    $chat.chat('addMessage', message, null, null, false, true);
+					// Clear message
+					$("#" + settings.textFieldID).val('');
                 }
             };
 
@@ -138,6 +141,7 @@
 			$.ajax({
 				type: "POST",
 				url: settings.sendMessageUrl,
+				async: false,
 				data: {
 					'username': settings.username,
 					'message': message,
@@ -150,23 +154,29 @@
         
         /**
          *  Add message to the message box
-         *  @param message string the adding message. When it's clear message takes
-         *   from textFuel with id = settings.textFieldID
+         *  @param message string the adding message. Message string must be html encoded. 
+		 *	When it's clear message takes from textFuel with id = settings.textFieldID and encode it.
          *  @param username string name of owner of message. When it's clear username from
          *   chatSettings will be used
          *  @param date object the date object
          *  @param noSendToServer boolean Determines whether to save the message on the server.
+		 *	@param encodeMessage boolean Specifies whether message must be encoded. 
+		 *	 Always sent to the server are not encoded message.
          *   When it's clear or false the message saved in the server.
          */
-		addMessage: function (message, username, date, noSendToServer) {
+		addMessage: function (message, username, date, noSendToServer, encodeMessage) {
 			var settings = chatSettings,
-				message = message || $("#" + settings.textFieldID).val(),
 				$chat = $(this);
 
+			if (!message) return;
+            
 			var date = date || new Date();
 			if (!noSendToServer)
 				$chat.chat('sendMessageToServer', message, date);
 				
+			if (encodeMessage)
+				message = $('<span>').text( message ).html();
+
 			// Create a message for the window
 			var sDate = '<span class="date">' +
 					date.getDate() + '/ ' +
@@ -180,15 +190,12 @@
 			var sUsername = username || settings.username;
 			sUsername = '<span class="username">' + sUsername + '</span>:';
 			
-			message = '<br/><span class="message">' + message + '<span/><br/>';
+			message = '<span class="message">' + message + '</span><br/>';
 		
 			$("#" + settings.contentID).append(sDate + sUsername + message);
 			
 			// Auto scroll
 			$("#" + settings.contentID).scrollTop(9999);
-			
-			// Clear message
-			$("#" + settings.textFieldID).val('');
         },
         
         /**
