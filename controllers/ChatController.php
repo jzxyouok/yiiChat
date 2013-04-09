@@ -33,23 +33,23 @@ class ChatController extends CExtController
     {
         $lastID = isset($_GET['lastID']) ? $_GET['lastID'] : 0;
         
-        if (!$lastID) {
-            $subsql = "SELECT `id`, `username`, `date`, `message` " .
-                        "FROM `$this->tableName` " .
-                        "ORDER BY date DESC LIMIT $this->messagesLimit";
+        if (!$lastID)
             $sql = "SELECT `id`, `username`, `date`, `message` " .
-                        "FROM ( $subsql ) as t ORDER BY date ASC";
-        }
-        else {
+                        "FROM `$this->tableName` ORDER BY `id` DESC LIMIT $this->messagesLimit";
+        else
             $sql = "SELECT `id`, `username`, `date`, `message` " .
                     "FROM `$this->tableName` " .
                     "WHERE `id` > $lastID " .
-                    "ORDER BY `date` ASC";
-        }
+                    "ORDER BY `id` ASC";
+
         $command = Yii::app()->db->createCommand($sql);
-        $dataReader = $command->query();
+        $data = $command->query()->readAll();
         
-        echo CJSON::encode($dataReader->readAll());
+        // Reverse
+        if (!$lastID)
+            $data = array_reverse ($data);
+        
+        echo CJSON::encode($data);
         Yii::app()->end();
     }
     
@@ -58,22 +58,20 @@ class ChatController extends CExtController
      */
     public function actionAddmessage()
     {
-        $username = self::deteleTags($_POST['username']);
-        $message = self::deteleTags($_POST['message']);
-        $date = self::deteleTags($_POST['date']);
+        $username = htmlspecialchars($_POST['username']);
+        $message = htmlspecialchars($_POST['message']);
+        $date = htmlspecialchars($_POST['date']);
 
-        $sql = "INSERT INTO `tbl_chat` (`username`, `message`, `date`) VALUES ('$username', '$message', '$date');";
+        $sql = "INSERT INTO `tbl_chat` (`username`, `message`, `date`) VALUES (:username, :message, :date);";
         $command = Yii::app()->db->createCommand($sql);
+        $command->bindParam(':username', $username, PDO::PARAM_STR);
+        $command->bindParam(':message', $message, PDO::PARAM_STR);
+        $command->bindParam(':date', $date, PDO::PARAM_INT);
         $command->execute();
         
         $sql = "SELECT `id` FROM `tbl_chat` ORDER BY `id` DESC LIMIT 1;";
         $command = Yii::app()->db->createCommand($sql);
         echo $command->queryScalar();
         Yii::app()->end();
-    }
-    
-    protected static function deteleTags($string)
-    {
-        return preg_replace('/<[^<]>/', '', $string);
     }
 }
